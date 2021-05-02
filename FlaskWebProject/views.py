@@ -21,20 +21,9 @@ imageSourceUrl = 'https://'+ app.config['BLOB_ACCOUNT']  + '.blob.core.windows.n
 def home():
     user = User.query.filter_by(username=current_user.username).first_or_404()
     posts = Post.query.all()
-    log=request.values.get('log_button')
-    if log:
-        if log == 'info':
-            app.logger.info('No issue.')
-        elif log == 'warning':
-            app.logger.warning('Warning occurred.')
-        elif log == 'error':
-            app.logger.error('Error occurred.')
-        elif log == 'critical':
-            app.logger.critical('Critical error occurred.')
     return render_template(
         'index.html',
         title='Home Page',
-        log=log,
         posts=posts
     )
 
@@ -78,12 +67,12 @@ def login():
         user = User.query.filter_by(username=form.username.data).first()
         if user is None or not user.check_password(form.password.data):
             flash('Invalid username or password')
-            app.logger.INFO('Invalid login attempt')
+            app.logger.info('Invalid login attempt')
             return redirect(url_for('login'))
+        app.logger.info('admin logged in successfully')
         login_user(user, remember=form.remember_me.data)
         next_page = request.args.get('next')
         if not next_page or url_parse(next_page).netloc != '':
-            app.logger.INFO('admin logged in successfully')
             next_page = url_for('home')
         return redirect(next_page)
     session["state"] = str(uuid.uuid4())
